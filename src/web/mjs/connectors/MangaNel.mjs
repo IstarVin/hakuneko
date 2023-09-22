@@ -19,10 +19,13 @@ export default class MangaNel extends Connector {
 
         this._queryChapters = [
             'ul.row-content-chapter li', // manganato, mangabat
-            'div.chapter_list ul li a', // mangairo
+            'div.chapter_list ul li', // mangairo
             'div.chapter-list div.row span a', // mangakakalot(s), kissmangawebsite, manganeloinfo
             'div.content.mCustomScrollbar div.chapter-list ul li.row div.chapter h4 a.xanh' // MangaPark
         ].join(', ');
+
+        this.queryChapter = '';
+        this.queryChapterDate = '';
 
         this._queryPages = [
             'div.container-chapter-reader source', // manganato, mangabat
@@ -88,12 +91,16 @@ export default class MangaNel extends Connector {
         let data = await this.fetchDOM(request, this._queryChapters);
         return data.map(element => {
             this.cfMailDecrypt(element);
-            let chapter = element.querySelector('a.chapter-name');
+            let chapter = element.querySelector(this.queryChapter);
+            let date = undefined;
+            if (this._getDate) {
+                date = this._getDate(element);
+            }
             return {
                 // get absolute links to support cross referencing between MangaNato affiliates and sub-domains
                 id: this.getAbsolutePath(chapter, request.url),
                 title: chapter.text.replace(manga.title, '').replace(this.chapterTitleFilter, '').trim(),
-                date: Date.parse(element.querySelector('.chapter-time').getAttribute('title')),
+                date: date,
                 language: ''
             };
         });
