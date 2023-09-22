@@ -20,15 +20,6 @@ export default class AsuraScans extends WordPressMangastream {
             genre: '.mgen > a',
             status: '.imptdt',
         };
-        this.details = {
-            thumbnail: '',
-            title: '',
-            author: '',
-            artist: '',
-            description: '',
-            genre: [],
-            status: '',
-        };
         this.config = {
             url: {
                 label: 'URL',

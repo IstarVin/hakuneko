@@ -18,7 +18,7 @@ export default class MangaNel extends Connector {
         this.queryMangas = 'div.genres-item-info h3 a.genres-item-name';
 
         this._queryChapters = [
-            'ul.row-content-chapter li a.chapter-name', // manganato, mangabat
+            'ul.row-content-chapter li', // manganato, mangabat
             'div.chapter_list ul li a', // mangairo
             'div.chapter-list div.row span a', // mangakakalot(s), kissmangawebsite, manganeloinfo
             'div.content.mCustomScrollbar div.chapter-list ul li.row div.chapter h4 a.xanh' // MangaPark
@@ -29,6 +29,17 @@ export default class MangaNel extends Connector {
             'div.chapter-content div.panel-read-story source', // mangairo
             'div#vungdoc source, div.vung-doc source, div.vung_doc source' // mangakakalot(s), kissmangawebsite, manganeloinfo
         ].join(', ');
+
+        this.queryDetailsAll = '.panel-story-info';
+        this.queryDetails = {
+            thumbnail: '.info-image > .img-loading',
+            title: '.story-info-right > h1',
+            author: '.variations-tableInfo > tbody > tr',
+            artist: '$',
+            description: '#panel-story-info-description',
+            genre: '$',
+            status: '$',
+        };
     }
 
     canHandleURI(uri) {
@@ -77,10 +88,13 @@ export default class MangaNel extends Connector {
         let data = await this.fetchDOM(request, this._queryChapters);
         return data.map(element => {
             this.cfMailDecrypt(element);
+            let chapter = element.querySelector('a.chapter-name');
+            console.log(Date.parse(element.querySelector('.chapter-time').getAttribute('title')));
             return {
                 // get absolute links to support cross referencing between MangaNato affiliates and sub-domains
-                id: this.getAbsolutePath(element, request.url),
-                title: element.text.replace(manga.title, '').replace(this.chapterTitleFilter, '').trim(),
+                id: this.getAbsolutePath(chapter, request.url),
+                title: chapter.text.replace(manga.title, '').replace(this.chapterTitleFilter, '').trim(),
+                date: Date.parse(element.querySelector('.chapter-time').getAttribute('title')),
                 language: ''
             };
         });
@@ -105,5 +119,38 @@ export default class MangaNel extends Connector {
         let promise = super._handleConnectorURI(payload.url);
         this.requestOptions.headers.delete('x-referer');
         return promise;
+    }
+
+    async _getMangaDetails(manga) {
+        let request = new Request(new URL(manga.id, this.url), this.requestOptions);
+        let data = await this.fetchDOM(request, this.queryDetailsAll);
+
+        if (data.length == 1) {
+            data = data[0];
+
+            // Thumbnail
+            this.details.thumbnail = data.querySelector(this.queryDetails.thumbnail).src;
+
+            // Title
+            this.details.title = data.querySelector(this.queryDetails.title).textContent.trim();
+
+            // Author & Artist & Genre & Status
+            data.querySelectorAll(this.queryDetails.author).forEach(element => {
+                let value = element.querySelector('.table-value').textContent.trim();
+                if (element.querySelector('.info-author')) {
+                    this.details.author = value;
+                } else if (element.querySelector('.info-status')) {
+                    this.details.status = value;
+                } else if (element.querySelector('.info-genres')) {
+                    element.querySelectorAll('.table-value > a').forEach(e => {
+                        this.details.genre.push(e.textContent.trim());
+                    });
+                }
+            });
+
+            // Description
+            this.details.description = data.querySelector(this.queryDetails.description).textContent.replace('Description :', '').trim();
+        }
+        return this.details;
     }
 }
