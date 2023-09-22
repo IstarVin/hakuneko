@@ -50,7 +50,7 @@ export default class WordPressMangastream extends Connector {
             return {
                 id: this.getRootRelativeOrAbsoluteLink(element, request.url),
                 title: title.replace(manga.title, '').trim() || manga.title,
-                date: date ? new Date(date) : undefined
+                date: date ? Date.parse(date) : undefined
             };
         });
         // console.log(chapterList);

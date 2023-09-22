@@ -29,7 +29,8 @@ export default class Storage {
         // TODO: Use fs-extra which provides more convenience functions (e.g. delete recursive)
         this.fs = require('fs');
         this.path = require('path');
-        this.config = this.path.join(electron.remote.app.getPath('userData'), 'hakuneko.');
+        this.dataPath = electron.remote.app.getPath('userData');
+        this.config = this.path.join(this.dataPath, 'hakuneko.');
         this.temp = this.path.join(require('os').tmpdir(), 'hakuneko');
         this._createDirectoryChain(this.temp);
 
@@ -89,9 +90,24 @@ export default class Storage {
     /**
      *
      */
+    copyDetailsToMangaPath(manga) {
+        let infoPath = this.path.join(this.dataPath, 'MangaInfos', this.sanatizePath(manga.title));
+        let output = this._mangaOutputPath(manga);
+        this._createDirectoryChain(output);
+
+        this.fs.readdirSync(infoPath).forEach(file => {
+            let src = this.path.join(infoPath, file);
+            let dest = this.path.join(output, file);
+            this.fs.copyFileSync(src, dest);
+        });
+    }
+
+    /**
+     *
+     */
     saveMangaDetails(manga, details, chapter) {
         let file = chapter ? 'chapters.json' : 'details.json';
-        let output = this._mangaOutputPath(manga);
+        let output = this.path.join(this.dataPath, 'MangaInfos', this.sanatizePath(manga.title));
         this._createDirectoryChain(output),
         this.fs.writeFileSync(this.path.join(output, file), JSON.stringify(details, undefined, '  '));
     }
@@ -100,9 +116,8 @@ export default class Storage {
      *
      */
     saveMangaThumbnail(manga, thumbnail) {
-        let output = this._mangaOutputPath(manga);
-        this._createDirectoryChain(output),
-        console.log(output, thumbnail);
+        let output = this.path.join(this.dataPath, 'MangaInfos', this.sanatizePath(manga.title));
+        this._createDirectoryChain(output);
         let extension = thumbnail.type.split('/')[1];
         this._blobToBytes(thumbnail)
             .then(data => {
@@ -229,7 +244,6 @@ export default class Storage {
                  * } );
                  */
                 let titleMap = [];
-                console.log(entries);
                 // use key value pairs instead of plain titles to increase performance when looking up a certain manga title
                 entries.forEach(entry => {
                     if (!entry.endsWith('.json') && !entry.startsWith('cover')) {

@@ -34,6 +34,7 @@ export default class DownloadManager extends EventTarget {
             this.queue[connector.id].push( job );
             job.setStatus( statusDefinitions.queued );
         }
+        Engine.Storage.copyDetailsToMangaPath(manga);
     }
 
     /**

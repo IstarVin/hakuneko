@@ -36,6 +36,16 @@ export default class Connector {
             headers: new Headers()
         };
         this.requestOptions.headers.set('accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9');
+
+        this.details = {
+            thumbnail: '',
+            title: '',
+            author: '',
+            artist: '',
+            description: '',
+            genre: [],
+            status: '',
+        };
     }
 
     canHandleURI(uri) {

@@ -14,6 +14,9 @@ export default class MangaIro extends MangaNel {
         this.queryMangaTitle = /name_title\s*=\s*['"](.+)['"]\s*;/g;
         this.queryMangasPageCount = 'div.group-page a.go-p-end';
         this.queryMangas = 'div.story-list div.story-item h3.story-name a';
+
+        this.queryChapter = 'a';
+        this.queryChapterDate = 'p';
         // NOTE: a corresponding entry for chapter/page queries must be defined in the base class (required for cross-domain-support)
     }
 
@@ -28,5 +31,9 @@ export default class MangaIro extends MangaNel {
         let id = uri.href;
         let title = data[0].trim();
         return new Manga(this, id, title);
+    }
+
+    _getDate(element) {
+        return Date.parse(element.querySelector(this.queryChapterDate).text.trim());
     }
 }

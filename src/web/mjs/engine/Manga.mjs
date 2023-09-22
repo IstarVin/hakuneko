@@ -109,7 +109,7 @@ export default class Manga extends EventTarget {
                 let chapterDetails = this.chapterCache.map(chapter => {
                     return {
                         title: chapter.title,
-                        date: Date.parse(chapter.date)
+                        date: chapter.date ? chapter.date : Date.now(),
                     };
                 });
                 Engine.Storage.saveMangaDetails(this, chapterDetails, true);
@@ -124,7 +124,7 @@ export default class Manga extends EventTarget {
     /**
      *
      */
-    getMangaDetails( callback ) {
+    getMangaDetails() {
         if (this.connector._getMangaDetails) {
             this.connector.initialize().then(()=> {
                 this.connector._getMangaDetails(this).then(details=>{
@@ -136,8 +136,9 @@ export default class Manga extends EventTarget {
                     });
                 });
             });
+        } else {
+            Engine.Storage.saveMangaDetails(this, { title: this.title }, false);
         }
-        callback();
         // console.log(this.connector._getMangaDetails);
         // console.log(this.chapterCache);
     }
