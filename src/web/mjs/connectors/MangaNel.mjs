@@ -89,7 +89,6 @@ export default class MangaNel extends Connector {
         return data.map(element => {
             this.cfMailDecrypt(element);
             let chapter = element.querySelector('a.chapter-name');
-            console.log(Date.parse(element.querySelector('.chapter-time').getAttribute('title')));
             return {
                 // get absolute links to support cross referencing between MangaNato affiliates and sub-domains
                 id: this.getAbsolutePath(chapter, request.url),
