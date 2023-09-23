@@ -16,7 +16,7 @@ export default class AsuraScans extends WordPressMangastream {
             title: 'h1.entry-title',
             author: '.fmed',
             artist: '.fmed',
-            description: '.entry-content > p',
+            description: '.entry-content',
             genre: '.mgen > a',
             status: '.imptdt',
         };
