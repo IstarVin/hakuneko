@@ -128,6 +128,7 @@ export default class Manga extends EventTarget {
         if (this.connector._getMangaDetails) {
             this.connector.initialize().then(()=> {
                 this.connector._getMangaDetails(this).then(details=>{
+                    details.mangaUrl = this.connector.url + this.id;
                     Engine.Storage.saveMangaDetails(this, details, false);
                     fetch(details.thumbnail).then(response => {
                         response.blob().then(blob => {
@@ -137,7 +138,9 @@ export default class Manga extends EventTarget {
                 });
             });
         } else {
-            Engine.Storage.saveMangaDetails(this, { title: this.title }, false);
+            Engine.Storage.saveMangaDetails(this, {
+                title: this.title, mangaUrl: this.connector.url + this.id
+            }, false);
         }
         // console.log(this.connector._getMangaDetails);
         // console.log(this.chapterCache);

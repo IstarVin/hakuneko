@@ -39,6 +39,7 @@ export default class Connector {
 
         this.details = {
             thumbnail: '',
+            mangaUrl: '',
             title: '',
             author: '',
             artist: '',
