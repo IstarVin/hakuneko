@@ -11,11 +11,21 @@ export default class WordPressMadara extends Connector {
         this.path = '';
 
         this.queryMangas = 'div.post-title h3 a, div.post-title h5 a';
-        this.queryChapters = 'li.wp-manga-chapter > a';
+        this.queryChapters = 'li.wp-manga-chapter';
         this.queryChaptersTitleBloat = undefined;
         this.queryPages = 'div.page-break source';
         this.queryTitleForURI = 'head meta[property="og:title"]';
         this.queryPlaceholder = '[id^="manga-chapters-holder"][data-id]';
+
+        this.queryDetails = {
+            thumbnail: '.summary_image > a > img, .summary_image > a > source',
+            title: '.post-title > h1',
+            author: '.post-content_item',
+            artist: '$',
+            description: '.dsct',
+            genre: '$',
+            status: '$',
+        };
     }
 
     _createMangaRequest(page) {
@@ -109,9 +119,12 @@ export default class WordPressMadara extends Connector {
                     }
                 });
             }
+            let chapter = element.querySelector('a');
+            let date = element.querySelector('.chapter-release-date');
             return {
-                id: this.getRootRelativeOrAbsoluteLink(element, request.url),
-                title: element.text.replace(manga.title, '').trim(),
+                id: this.getRootRelativeOrAbsoluteLink(chapter, request.url),
+                title: chapter.text.replace(manga.title, '').trim(),
+                date: date.textContent ? Date.parse(date.textContent) : Date.now(),
                 language: ''
             };
         });
@@ -170,5 +183,47 @@ export default class WordPressMadara extends Connector {
         const element = [...data].pop();
         const title = (element.content || element.textContent).trim();
         return new Manga(this, uri, title);
+    }
+
+    async _getMangaDetails(manga) {
+        let request = new Request(new URL(manga.id, this.url), this.requestOptions);
+        let data = await this.fetchDOM(request, 'body');
+
+        console.log(data[0]);
+
+        if (data.length == 1) {
+            data = data[0];
+
+            // Thumbnail
+            this.details.thumbnail = data.querySelector(this.queryDetails.thumbnail).src.replace(/-\d+x\d+/, '');
+
+            // Title
+            this.details.title = data.querySelector(this.queryDetails.title).textContent.trim();
+
+            // Description
+            this.details.description = data.querySelector(this.queryDetails.description).textContent.trim();
+
+            // Author Artis Genre Status
+            data.querySelectorAll(this.queryDetails.author).forEach(element => {
+                let key = element.querySelector('.summary-heading').textContent.trim();
+                let value = element.querySelector('.summary-content').textContent.trim();
+
+                if (element.querySelector('.author-content')) {
+                    this.details.author = value;
+                } else if (element.querySelector('.artist-content')) {
+                    this.details.artist = value;
+                } else if (element.querySelector('.genres-content')) {
+                    element.querySelectorAll('.genres-content > a').forEach(e => {
+                        this.details.genre.push(e.textContent.trim());
+                    });
+                } else if (key === 'Status') {
+                    this.details.status = value;
+                }
+            });
+        }
+
+        console.log(this.details);
+
+        return this.details;
     }
 }

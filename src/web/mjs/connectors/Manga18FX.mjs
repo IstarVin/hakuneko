@@ -47,7 +47,6 @@ export default class Manga18FX extends WordPressMadara {
         return data.map(element => {
             let chapter = element.querySelector('a.chapter-name');
             let date = element.querySelector('.chapter-time');
-            console.log(date ? Date.parse(date.textContent) : new Date().getTime());
             return {
                 id: this.getRootRelativeOrAbsoluteLink(chapter, this.url),
                 title: chapter.textContent.trim(),
@@ -63,53 +62,5 @@ export default class Manga18FX extends WordPressMadara {
             url: this.getAbsolutePath(image, request.url),
             referer: request.url
         }));
-    }
-
-    async _getMangaDetails(manga) {
-        let queryDetails = {
-            thumbnail: '.img-loading',
-            title: '.post-title > h1',
-            author: '.post-content_item',
-            artist: '$',
-            description: '.dsct',
-            genre: '$',
-            status: '$',
-        };
-
-        let request = new Request(new URL(manga.id, this.url), this.requestOptions);
-        let data = await this.fetchDOM(request, '.manga-content');
-
-        if (data.length == 1) {
-            data = data[0];
-
-            // Thumbnail
-            this.details.thumbnail = data.querySelector(queryDetails.thumbnail).getAttribute('data-src');
-
-            // Title
-            this.details.title = data.querySelector(queryDetails.title).textContent.trim();
-
-            // Description
-            this.details.description = data.querySelector(queryDetails.description).textContent.trim();
-
-            // Author Artis Genre Status
-            data.querySelectorAll(queryDetails.author).forEach(element => {
-                let key = element.querySelector('.summary-heading').textContent.trim();
-                let value = element.querySelector('.summary-content').textContent.trim();
-
-                if (element.querySelector('.author-content')) {
-                    this.details.author = value;
-                } else if (element.querySelector('.artist-content')) {
-                    this.details.artist = value;
-                } else if (element.querySelector('.genres-content')) {
-                    element.querySelectorAll('.genres-content > a').forEach(e => {
-                        this.details.genre.push(e.textContent.trim());
-                    });
-                } else if (key === 'Status') {
-                    this.details.status = value;
-                }
-            });
-        }
-
-        return this.details;
     }
 }

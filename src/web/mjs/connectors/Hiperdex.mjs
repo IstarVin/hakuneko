@@ -15,6 +15,7 @@ export default class Hiperdex extends WordPressMadara {
                 value: 'https://hiperdex.com'
             }
         };
+        this.queryDetails.description = '.summary__content';
     }
 
     get url() {
