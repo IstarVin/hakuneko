@@ -108,7 +108,7 @@ export default class Manga extends EventTarget {
             .then(() => {
                 let chapterDetails = this.chapterCache.map(chapter => {
                     return {
-                        title: chapter.title,
+                        title: Engine.Storage.sanatizePath(chapter.title),
                         date: chapter.date ? chapter.date : Date.now(),
                     };
                 });
