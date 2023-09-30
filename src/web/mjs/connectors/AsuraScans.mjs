@@ -16,7 +16,7 @@ export default class AsuraScans extends WordPressMangastream {
             title: 'h1.entry-title',
             author: '.fmed',
             artist: '.fmed',
-            description: '.entry-content',
+            description: '.entry-content > p',
             genre: '.mgen > a',
             status: '.imptdt',
         };
@@ -25,7 +25,7 @@ export default class AsuraScans extends WordPressMangastream {
                 label: 'URL',
                 description: `This website change domains regularly.\nThis is the default URL which can also be manually set by the user.`,
                 input: 'text',
-                value: 'https://asura.nacm.xyz'
+                value: 'https://asuracomics.gg'
             }
         };
     }
@@ -55,7 +55,11 @@ export default class AsuraScans extends WordPressMangastream {
             this.details.title = data.querySelector(this.queryDetails.title).textContent.trim();
 
             // Description
-            this.details.description = data.querySelector(this.queryDetails.description).textContent.trim();
+            let descriptionArray = [];
+            data.querySelectorAll(this.queryDetails.description).forEach(e => {
+                descriptionArray.push(e.textContent);
+            });
+            this.details.description = descriptionArray.join('\n');
 
             // Author and Artist
             let details = data.querySelectorAll(this.queryDetails.author);
