@@ -1,13 +1,13 @@
 import WordPressMangastream from './templates/WordPressMangastream.mjs';
 
-export default class OzulScans extends WordPressMangastream {
+export default class GalaxyAction extends WordPressMangastream {
 
     constructor() {
         super();
-        super.id = 'ozulscans';
-        super.label = 'Ozul Scans';
+        super.id = 'galaxyaction';
+        super.label = 'Galaxy Action';
         this.tags = ['webtoon', 'arabic', 'scanlation'];
-        this.url = 'https://ozulscans.net';
+        this.url = 'https://galaxyaction.site';
         this.path = '/manga/list-mode/';
     }
 }
